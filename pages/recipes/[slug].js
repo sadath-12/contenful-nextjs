@@ -19,17 +19,28 @@ export const getStaticPaths=async()=>{
 
   return {
     paths,
-    //will show 404 error page instead of show browser hanging or something
-    fallback:false
+    //will show 404 error page if fallback:false instead of show browser hanging or something
+    fallback:true
+    // so now instead get the below components by rerunning the staticProps function if fallback:true 
   }
-
 }
+
 
 export async function getStaticProps({params}){
   const {items} = await client.getEntries({
     content_type:'recipie',
      'fields.slug':params.slug
   })
+
+  if (!items.length){
+    return {
+      redirect:{
+        destination:'/',
+        //bcz in future we might have tht recipe
+        permanent:false
+      }
+    }
+  }
 
   return {
     props:{
@@ -42,6 +53,7 @@ export async function getStaticProps({params}){
 }
 
 export default function RecipeDetails({recipe}) {
+  if(!recipe) return <h1>loading ......</h1>
   const {featuredImage,title,cookingTime,ingredients,method}=recipe.fields
   return (
     <div>
